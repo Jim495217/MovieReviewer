@@ -1,56 +1,34 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { fetchMovieDetails } from "../services/tmdbApi";
-import { useMovies } from "../context/MovieContext";
 
 function MoviePage() {
-  const { id } = useParams();
-  const { addFavorite, submitRating } = useMovies();
+  const { id } = useParams(); // get movie id from URL
   const [movie, setMovie] = useState(null);
-  const [animation, setAnimation] = useState(5);
-  const [story, setStory] = useState(5);
+
+  const API_KEY = "YOUR_API_KEY";
 
   useEffect(() => {
-    fetchMovieDetails(id).then(setMovie);
+    fetch(`https://www.omdbapi.com/?i=${id}&apikey=${API_KEY}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setMovie(data);
+      });
   }, [id]);
 
-  if (!movie) return <p>Loading...</p>;
-
-  const handleSubmit = () => {
-    submitRating(id, { animation, story });
-  };
+  if (!movie) {
+    return <h2>Loading movie...</h2>;
+  }
 
   return (
     <div>
-      <h1>{movie.title}</h1>
-      <p>{movie.overview}</p>
+      <h1>{movie.Title}</h1>
 
-      <button onClick={() => addFavorite(movie)}>Add to Favorites</button>
+      <img src={movie.Poster} alt={movie.Title} />
 
-      <h3>Rate This Movie</h3>
-      <label>
-        Animation:
-        <input
-          type="number"
-          value={animation}
-          onChange={(e) => setAnimation(Number(e.target.value))}
-          min="1"
-          max="10"
-        />
-      </label>
-
-      <label>
-        Story:
-        <input
-          type="number"
-          value={story}
-          onChange={(e) => setStory(Number(e.target.value))}
-          min="1"
-          max="10"
-        />
-      </label>
-
-      <button onClick={handleSubmit}>Submit Rating</button>
+      <p><strong>Year:</strong> {movie.Year}</p>
+      <p><strong>Genre:</strong> {movie.Genre}</p>
+      <p><strong>Plot:</strong> {movie.Plot}</p>
+      <p><strong>IMDB Rating:</strong> {movie.imdbRating}</p>
     </div>
   );
 }
